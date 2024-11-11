@@ -7,6 +7,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from accounts.utils import send_otp_email
 from .serializers import UserRegisterSerializer, LoginSerializer, SetNewPasswordSerializer, PasswordResetRequestSerializer, LogoutUserSerializer
 from .models import OneTimePassword, User
+from employee.models import Employee
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -48,6 +49,7 @@ class VerifyUserEmail(GenericAPIView):
             if not user.is_verified:
                 user.is_verified = True
                 user.save()
+                Employee.objects.create(user=user)
                 return Response({'message': 'User has been verified successfully'}, status=HTTP_201_CREATED)
             
             return Response({'message': 'User is already verified'}, status=HTTP_204_NO_CONTENT)

@@ -2,7 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from .managers import UserManager
+from employee.models import Employee
+from .signals import create_employee_profile
+
 # Create your models here.
 
 AUTH_PROVIDERS = {'google': 'google', 'email': 'email', 'github': 'github'}
@@ -39,6 +43,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             'refresh': str(refresh),
             'access': str(refresh.access_token)
         }
+    
+    def save(self, *args, **kwargs):
+        create_employee_profile(sender=User, instance=self, created=True)
+        return super(User, self).save(*args, **kwargs)
 
 
 class OneTimePassword(models.Model):
